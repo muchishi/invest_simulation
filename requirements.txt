@@ -5,9 +5,8 @@
 # Core
 python-dotenv>=1.0.0
 pydantic>=2.0.0
-pydantic-settings>=2.0.0
+pydantic-settings>=2.1.0
 pytz>=2026.2
-psycopg2
 
 # --- AI Provider (使用するものだけインストール) ---
 # Groq (無料枠あり): AI_PROVIDER=groq の場合
