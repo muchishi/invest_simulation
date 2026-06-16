@@ -1,0 +1,38 @@
+name: 朝の市場分析 (07:00 JST)
+
+on:
+  schedule:
+    - cron: "0 22 * * *"  # 22:00 UTC = 07:00 JST (翌日)
+  workflow_dispatch:       # 手動実行も可能
+
+jobs:
+  morning-analysis:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: 依存パッケージインストール
+        run: pip install -r requirements.txt
+
+      - name: 朝の分析実行
+        env:
+          AI_PROVIDER: ${{ secrets.AI_PROVIDER }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GROQ_MODEL: ${{ secrets.GROQ_MODEL }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CLAUDE_MODEL: ${{ secrets.CLAUDE_MODEL }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          COINGECKO_API_KEY: ${{ secrets.COINGECKO_API_KEY }}
+          INITIAL_CAPITAL_JPY: ${{ secrets.INITIAL_CAPITAL_JPY }}
+          MAX_POSITION_PCT: ${{ secrets.MAX_POSITION_PCT }}
+          MAX_POSITIONS: ${{ secrets.MAX_POSITIONS }}
+          TRANSACTION_FEE_PCT: ${{ secrets.TRANSACTION_FEE_PCT }}
+          TIMEZONE: Asia/Tokyo
+        run: python scripts/morning_analysis.py

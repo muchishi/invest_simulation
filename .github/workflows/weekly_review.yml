@@ -1,0 +1,38 @@
+name: 週次反省会 (日曜 22:00 JST)
+
+on:
+  schedule:
+    - cron: "0 13 * * 0"  # 13:00 UTC 日曜 = 22:00 JST 日曜
+  workflow_dispatch:
+
+jobs:
+  weekly-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: 依存パッケージインストール
+        run: pip install -r requirements.txt
+
+      - name: 週次反省会実行
+        env:
+          AI_PROVIDER: ${{ secrets.AI_PROVIDER }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GROQ_MODEL: ${{ secrets.GROQ_MODEL }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CLAUDE_MODEL: ${{ secrets.CLAUDE_MODEL }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          COINGECKO_API_KEY: ${{ secrets.COINGECKO_API_KEY }}
+          INITIAL_CAPITAL_JPY: ${{ secrets.INITIAL_CAPITAL_JPY }}
+          MAX_POSITION_PCT: ${{ secrets.MAX_POSITION_PCT }}
+          MAX_POSITIONS: ${{ secrets.MAX_POSITIONS }}
+          TRANSACTION_FEE_PCT: ${{ secrets.TRANSACTION_FEE_PCT }}
+          TIMEZONE: Asia/Tokyo
+        run: python scripts/weekly_review.py
