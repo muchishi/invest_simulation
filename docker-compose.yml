@@ -1,0 +1,37 @@
+version: "3.9"
+
+services:
+  scheduler:
+    build: .
+    container_name: invest_scheduler
+    command: python main.py
+    env_file: .env
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+    depends_on:
+      - redis
+    networks:
+      - invest_net
+
+  dashboard:
+    build: .
+    container_name: invest_dashboard
+    command: streamlit run src/dashboard/app.py --server.port=8501 --server.address=0.0.0.0
+    env_file: .env
+    ports:
+      - "8501:8501"
+    restart: unless-stopped
+    networks:
+      - invest_net
+
+  redis:
+    image: redis:7-alpine
+    container_name: invest_redis
+    restart: unless-stopped
+    networks:
+      - invest_net
+
+networks:
+  invest_net:
+    driver: bridge

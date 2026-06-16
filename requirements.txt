@@ -1,0 +1,40 @@
+# ============================================================
+# AI Investment Simulator - Dependencies
+# ============================================================
+
+# Core
+python-dotenv>=1.0.0
+pydantic>=2.0.0
+pydantic-settings>=2.0.0
+pytz>=2026.2
+psycopg2
+
+# --- AI Provider (使用するものだけインストール) ---
+# Groq (無料枠あり): AI_PROVIDER=groq の場合
+groq>=0.9.0
+# Anthropic Claude (有料): AI_PROVIDER=claude の場合
+anthropic>=0.40.0
+
+# Market Data
+yfinance>=0.2.40
+pycoingecko>=3.1.0
+httpx>=0.27.0
+requests>=2.31.0
+
+# Database
+sqlalchemy>=2.0.0
+psycopg2-binary>=2.9.9
+
+# Data Processing
+pandas>=2.0.0
+numpy>=1.26.0
+
+# Scheduling
+apscheduler>=3.10.4
+
+# Dashboard
+streamlit>=1.40.0
+plotly>=5.20.0
+
+# Utilities
+tenacity>=8.2.0
