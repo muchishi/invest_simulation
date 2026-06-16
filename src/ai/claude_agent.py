@@ -24,8 +24,7 @@ class ClaudeAgent(AIAgent):
         settings = get_settings()
         self.client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
         self.model = settings.CLAUDE_MODEL
-        self.input_cost = settings.CLAUDE_INPUT_TOKEN_COST
-        self.output_cost = settings.CLAUDE_OUTPUT_TOKEN_COST
+        self.input_cost, self.output_cost = settings.claude_token_costs
 
     def _call_api(self, system: str, user: str, max_tokens: int = 4096) -> tuple[str, int, int, float]:
         """Claude API 呼び出し。(response_text, input_tokens, output_tokens, cost_usd) を返す"""

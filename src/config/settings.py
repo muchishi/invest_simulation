@@ -9,10 +9,21 @@ class Settings(BaseSettings):
 
     # Anthropic
     ANTHROPIC_API_KEY: str = Field(..., description="Anthropic API key")
+    # claude-opus-4-8: 最高精度・複雑な投資判断に最適 ($15/$75 per MTok)
+    # claude-sonnet-4-6: バランス型・コスト重視の場合 ($3/$15 per MTok)
+    # claude-haiku-4-5: 高速・超低コスト・単純分類向け ($0.80/$4 per MTok)
     CLAUDE_MODEL: str = Field(default="claude-opus-4-8")
 
-    # Database
-    DATABASE_URL: str = Field(..., description="PostgreSQL connection string")
+    # --- Database (Supabase / PostgreSQL) ---
+    # SQLAlchemy直接接続に使用。Supabase API Keyは不要。
+    # Supabase Dashboard > Settings > Database > Connection string (URI) から取得
+    DATABASE_URL: str = Field(..., description="Supabase PostgreSQL direct connection string")
+
+    # --- Supabase Client SDK (Storage / Auth / Realtime 利用時のみ必要) ---
+    # 現在の実装では未使用。将来の拡張（レポートファイル保存等）用。
+    # Supabase Dashboard > Settings > API から取得
+    SUPABASE_URL: Optional[str] = Field(default=None, description="Supabase project URL (https://xxx.supabase.co)")
+    SUPABASE_KEY: Optional[str] = Field(default=None, description="Supabase service_role key (NOT anon key)")
 
     # CoinGecko
     COINGECKO_API_KEY: Optional[str] = Field(default=None)
@@ -59,9 +70,22 @@ class Settings(BaseSettings):
         default=["BTC-USD", "ETH-USD", "SPY", "QQQ", "VT"]
     )
 
-    # API cost per token (USD) - claude-opus-4-8
+    # API cost per token (USD) - モデルに応じた価格を手動設定
+    # claude-opus-4-8:    input=$15/MTok  output=$75/MTok
+    # claude-sonnet-4-6:  input=$3/MTok   output=$15/MTok
+    # claude-haiku-4-5:   input=$0.80/MTok output=$4/MTok
     CLAUDE_INPUT_TOKEN_COST: float = Field(default=15.0 / 1_000_000)
     CLAUDE_OUTPUT_TOKEN_COST: float = Field(default=75.0 / 1_000_000)
+
+    @property
+    def claude_token_costs(self) -> tuple[float, float]:
+        """選択モデルに応じたトークンコスト (input, output) を返す"""
+        costs = {
+            "claude-opus-4-8":   (15.0 / 1_000_000, 75.0 / 1_000_000),
+            "claude-sonnet-4-6": (3.0  / 1_000_000, 15.0 / 1_000_000),
+            "claude-haiku-4-5-20251001": (0.80 / 1_000_000, 4.0 / 1_000_000),
+        }
+        return costs.get(self.CLAUDE_MODEL, (self.CLAUDE_INPUT_TOKEN_COST, self.CLAUDE_OUTPUT_TOKEN_COST))
 
 
 @lru_cache(maxsize=1)
