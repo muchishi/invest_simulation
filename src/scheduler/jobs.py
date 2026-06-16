@@ -5,7 +5,7 @@ from typing import Optional
 import pytz
 
 from src.config import get_settings
-from src.ai.claude_agent import ClaudeAgent
+from src.ai.agent_factory import create_agent
 from src.db.session import get_session
 from src.db.repository import Repository
 from src.market_data.factory import MarketDataFactory
@@ -21,7 +21,7 @@ class InvestmentScheduler:
 
     def __init__(self):
         self.settings = get_settings()
-        self.agent = ClaudeAgent()
+        self.agent = create_agent()
         self.market_factory = MarketDataFactory()
         self.technical = TechnicalAnalyzer()
         self.jst = pytz.timezone(self.settings.TIMEZONE)
