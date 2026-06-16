@@ -19,7 +19,7 @@ def _get_engine():
             max_overflow=10,
             echo=False,
         )
-        _SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=_engine)
+        _SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=_engine, expire_on_commit=False)
     return _engine
 
 

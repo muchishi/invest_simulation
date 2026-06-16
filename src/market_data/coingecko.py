@@ -33,13 +33,18 @@ class CoinGeckoProvider(MarketDataProvider):
 
     def __init__(self, api_key: Optional[str] = None):
         self.api_key = api_key
-        self.base_url = COINGECKO_PRO_BASE if api_key else COINGECKO_BASE
+        # Demo keys (CG-...) use the public endpoint; Pro keys use the Pro endpoint
+        self._is_demo = api_key is not None and api_key.startswith("CG-")
+        self._is_pro = api_key is not None and not self._is_demo
+        self.base_url = COINGECKO_PRO_BASE if self._is_pro else COINGECKO_BASE
         self._last_request_time = 0.0
-        self._rate_limit_delay = 2.0 if not api_key else 0.5  # free: 30req/min
+        self._rate_limit_delay = 1.0 if api_key else 2.0  # demo: ~50req/min, free: 30req/min
 
     def _get_headers(self) -> dict:
-        if self.api_key:
+        if self._is_pro:
             return {"x-cg-pro-api-key": self.api_key}
+        if self._is_demo:
+            return {"x-cg-demo-api-key": self.api_key}
         return {}
 
     def _rate_limit(self):

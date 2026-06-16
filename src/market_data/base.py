@@ -40,7 +40,7 @@ class AssetData:
             "price_change_1h_pct": self.price_change_1h_pct,
             "price_change_24h_pct": self.price_change_24h_pct,
             "price_change_7d_pct": self.price_change_7d_pct,
-            "captured_at": self.captured_at,
+            "captured_at": self.captured_at.isoformat(),
         }
 
 
