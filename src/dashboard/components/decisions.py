@@ -3,6 +3,7 @@ import plotly.graph_objects as go
 import pandas as pd
 from src.db.session import get_session
 from src.db.repository import Repository
+from src.dashboard.symbol_labels import format_symbol, to_jst
 
 
 @st.cache_data(ttl=300)
@@ -31,8 +32,10 @@ def render_decisions():
     # ── フィルター ────────────────────────────────────────────────
     col1, col2, col3 = st.columns(3)
     with col1:
-        symbols = ["全銘柄"] + sorted(list({d.symbol for d in decisions}))
-        sel_sym = st.selectbox("銘柄", symbols)
+        raw_symbols = sorted({d.symbol for d in decisions})
+        sym_options = {"全銘柄": None} | {format_symbol(s): s for s in raw_symbols}
+        sel_label = st.selectbox("銘柄", list(sym_options.keys()))
+        sel_sym_raw = sym_options[sel_label]
     with col2:
         actions = ["全て", "BUY", "SELL", "HOLD"]
         sel_action = st.selectbox("判断", actions)
@@ -41,8 +44,8 @@ def render_decisions():
         sel_session = st.selectbox("セッション", sessions)
 
     filtered = decisions
-    if sel_sym != "全銘柄":
-        filtered = [d for d in filtered if d.symbol == sel_sym]
+    if sel_sym_raw is not None:
+        filtered = [d for d in filtered if d.symbol == sel_sym_raw]
     if sel_action != "全て":
         filtered = [d for d in filtered if d.action == sel_action]
     if sel_session != "全て":
@@ -69,8 +72,8 @@ def render_decisions():
         action_emoji = {"BUY": "🟢", "SELL": "🔴", "HOLD": "⚪"}.get(d.action, "⚪")
         risk_emoji = {"low": "🟢", "medium": "🟡", "high": "🔴"}.get(d.risk_level or "", "⚪")
         rows.append({
-            "日時": d.decided_at.strftime("%m/%d %H:%M"),
-            "銘柄": d.symbol,
+            "日時": to_jst(d.decided_at).strftime("%m/%d %H:%M"),
+            "銘柄": format_symbol(d.symbol),
             "判断": f"{action_emoji} {d.action}",
             "信頼度": f"{d.confidence}%" if d.confidence else "-",
             "期待リターン": f"{d.expected_return_pct:+.1f}%" if d.expected_return_pct else "-",
@@ -89,13 +92,13 @@ def render_decisions():
         selected_idx = st.selectbox(
             "詳細を見る",
             range(min(20, len(filtered))),
-            format_func=lambda i: f"{filtered[i].decided_at.strftime('%m/%d %H:%M')} {filtered[i].symbol} {filtered[i].action}",
+            format_func=lambda i: f"{to_jst(filtered[i].decided_at).strftime('%m/%d %H:%M')} {filtered[i].symbol} {filtered[i].action}",
         )
         d = filtered[selected_idx]
 
         col1, col2 = st.columns(2)
         with col1:
-            st.markdown(f"**銘柄:** {d.symbol}")
+            st.markdown(f"**銘柄:** {format_symbol(d.symbol)}")
             st.markdown(f"**判断:** {d.action}")
             st.markdown(f"**信頼度:** {d.confidence}%")
             st.markdown(f"**期待リターン:** {d.expected_return_pct:+.1f}%" if d.expected_return_pct else "**期待リターン:** -")

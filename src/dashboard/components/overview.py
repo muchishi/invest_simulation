@@ -6,6 +6,7 @@ import pandas as pd
 from src.db.session import get_session
 from src.db.repository import Repository
 from src.config import get_settings
+from src.dashboard.symbol_labels import format_symbol, to_jst
 
 
 @st.cache_data(ttl=300)
@@ -132,7 +133,7 @@ def render_overview():
             sentiment = morning.overall_sentiment or "neutral"
             color_map = {"bullish": "🟢", "neutral": "🟡", "bearish": "🔴"}
             st.metric("朝の分析", f"{color_map.get(sentiment, '⚪')} {sentiment.upper()}")
-            st.caption(f"分析時刻: {morning.analyzed_at.strftime('%Y/%m/%d %H:%M')}")
+            st.caption(f"分析時刻: {to_jst(morning.analyzed_at).strftime('%Y/%m/%d %H:%M')} JST")
             if morning.analysis_summary:
                 st.text_area("サマリー", morning.analysis_summary[:300], height=120, disabled=True)
         else:
@@ -193,8 +194,8 @@ def render_overview():
         for d in decisions[:10]:
             action_emoji = {"BUY": "🟢", "SELL": "🔴", "HOLD": "⚪"}.get(d.action, "⚪")
             rows.append({
-                "日時": d.decided_at.strftime("%m/%d %H:%M"),
-                "銘柄": d.symbol,
+                "日時": to_jst(d.decided_at).strftime("%m/%d %H:%M"),
+                "銘柄": format_symbol(d.symbol),
                 "判断": f"{action_emoji} {d.action}",
                 "信頼度": f"{d.confidence}%" if d.confidence else "-",
                 "理由": (d.reasoning or "")[:60] + "..." if d.reasoning and len(d.reasoning) > 60 else (d.reasoning or ""),

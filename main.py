@@ -17,6 +17,8 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
+os.makedirs("logs", exist_ok=True)
+
 import pytz
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.triggers.cron import CronTrigger

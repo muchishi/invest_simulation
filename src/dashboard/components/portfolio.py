@@ -4,6 +4,7 @@ import plotly.express as px
 import pandas as pd
 from src.db.session import get_session
 from src.db.repository import Repository
+from src.dashboard.symbol_labels import format_symbol, short_name
 
 
 @st.cache_data(ttl=300)
@@ -54,7 +55,7 @@ def render_portfolio():
             pnl = float(h.get("unrealized_pnl_jpy", 0))
             pnl_pct = float(h.get("unrealized_pnl_pct", 0))
             rows.append({
-                "銘柄": h["symbol"],
+                "銘柄": format_symbol(h["symbol"]),
                 "数量": h["quantity"],
                 "平均取得単価(円)": f"{float(h.get('avg_cost_jpy', 0)):,.2f}",
                 "現在価格(円)": f"{float(h.get('current_price_jpy', 0)):,.2f}",
@@ -76,7 +77,7 @@ def render_portfolio():
     # ── 個別銘柄損益グラフ ────────────────────────────────────────
     if holdings:
         st.subheader("評価損益")
-        symbols = [h["symbol"] for h in holdings]
+        symbols = [short_name(h["symbol"]) for h in holdings]
         pnls = [float(h.get("unrealized_pnl_jpy", 0)) for h in holdings]
         colors = ["#26a69a" if p >= 0 else "#ef5350" for p in pnls]
 
@@ -104,7 +105,7 @@ def _render_allocation_pie(portfolio, holdings: list):
     total_val = float(portfolio.total_value_jpy)
     cash_val = float(portfolio.cash_balance_jpy)
 
-    labels = ["現金"] + [h["symbol"] for h in holdings]
+    labels = ["現金"] + [short_name(h["symbol"]) for h in holdings]
     values = [cash_val] + [float(h.get("current_value_jpy", 0)) for h in holdings]
     colors = ["#546e7a", "#26a69a", "#42a5f5", "#ab47bc", "#ef5350", "#ffa726"]
 
